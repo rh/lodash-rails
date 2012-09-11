@@ -13,5 +13,4 @@ Gem::Specification.new do |s|
   s.files = Dir["{lib,vendor}/**/*"] + ["README.md"]
   s.homepage = 'http://github.com/rh/lodash-rails'
   s.license = 'MIT'
-  s.has_rdoc = false
 end
