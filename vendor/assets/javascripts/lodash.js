@@ -1,5 +1,5 @@
 /*!
- * Lo-Dash v0.9.2 <http://lodash.com>
+ * Lo-Dash 0.10.0 <http://lodash.com>
  * (c) 2012 John-David Dalton <http://allyoucanleet.com/>
  * Based on Underscore.js 1.4.2 <http://underscorejs.org>
  * (c) 2009-2012 Jeremy Ashkenas, DocumentCloud Inc.
@@ -417,6 +417,16 @@
     'return result'
   );
 
+  /** Reusable iterator options for `assign` and `defaults` */
+  var assignIteratorOptions = {
+    'args': 'object, source, guard',
+    'top':
+      'for (var argsIndex = 1, argsLength = typeof guard == \'number\' ? 2 : arguments.length; argsIndex < argsLength; argsIndex++) {\n' +
+      '  if ((iteratee = arguments[argsIndex])) {',
+    'objectLoop': 'result[index] = value',
+    'bottom': '  }\n}'
+  };
+
   /**
    * Reusable iterator options shared by `forEach`, `forIn`, and `forOwn`.
    */
@@ -425,17 +435,6 @@
     'top': 'callback = createCallback(callback, thisArg)',
     'arrayLoop': 'if (callback(value, index, collection) === false) return result',
     'objectLoop': 'if (callback(value, index, collection) === false) return result'
-  };
-
-  /** Reusable iterator options for `defaults`, and `extend` */
-  var extendIteratorOptions = {
-    'useHas': false,
-    'args': 'object',
-    'top':
-      'for (var argsIndex = 1, argsLength = arguments.length; argsIndex < argsLength; argsIndex++) {\n' +
-      '  if (iteratee = arguments[argsIndex]) {',
-    'objectLoop': 'result[index] = value',
-    'bottom': '  }\n}'
   };
 
   /** Reusable iterator options for `forIn` and `forOwn` */
@@ -537,11 +536,14 @@
   function createBound(func, thisArg, partialArgs) {
     var isFunc = isFunction(func),
         isPartial = !partialArgs,
-        methodName = func;
+        key = thisArg;
 
     // juggle arguments
     if (isPartial) {
       partialArgs = thisArg;
+    }
+    if (!isFunc) {
+      thisArg = func;
     }
 
     function bound() {
@@ -551,7 +553,7 @@
           thisBinding = isPartial ? this : thisArg;
 
       if (!isFunc) {
-        func = thisArg[methodName];
+        func = thisArg[key];
       }
       if (partialArgs.length) {
         args = args.length
@@ -698,6 +700,25 @@
   /*--------------------------------------------------------------------------*/
 
   /**
+   * Assigns own enumerable properties of source object(s) to the `destination`
+   * object. Subsequent sources will overwrite propery assignments of previous
+   * sources.
+   *
+   * @static
+   * @memberOf _
+   * @alias extend
+   * @category Objects
+   * @param {Object} object The destination object.
+   * @param {Object} [source1, source2, ...] The source objects.
+   * @returns {Object} Returns the destination object.
+   * @example
+   *
+   * _.assign({ 'name': 'moe' }, { 'age': 40 });
+   * // => { 'name': 'moe', 'age': 40 }
+   */
+  var assign = createIterator(assignIteratorOptions);
+
+  /**
    * Checks if `value` is an `arguments` object.
    *
    * @static
@@ -756,7 +777,7 @@
   });
 
   /**
-   * Iterates over `object`'s own enumerable properties, executing the `callback`
+   * Iterates over an object's own enumerable properties, executing the `callback`
    * for each property. The `callback` is bound to `thisArg` and invoked with three
    * arguments; (value, key, object). Callbacks may exit iteration early by explicitly
    * returning `false`.
@@ -915,7 +936,7 @@
     if (!isObj || !deep) {
       // don't clone functions
       return isObj
-        ? (isArr ? slice.call(value) : extend({}, value))
+        ? (isArr ? slice.call(value) : assign({}, value))
         : value;
     }
 
@@ -959,7 +980,7 @@
   }
 
   /**
-   * Assigns enumerable properties of the default object(s) to the `destination`
+   * Assigns own enumerable properties of source object(s) to the `destination`
    * object for all `destination` properties that resolve to `null`/`undefined`.
    * Once a property is set, additional defaults of the same property will be
    * ignored.
@@ -976,27 +997,9 @@
    * _.defaults(iceCream, { 'flavor': 'vanilla', 'sprinkles': 'rainbow' });
    * // => { 'flavor': 'chocolate', 'sprinkles': 'rainbow' }
    */
-  var defaults = createIterator(extendIteratorOptions, {
-    'objectLoop': 'if (result[index] == null) ' + extendIteratorOptions.objectLoop
+  var defaults = createIterator(assignIteratorOptions, {
+    'objectLoop': 'if (result[index] == null) ' + assignIteratorOptions.objectLoop
   });
-
-  /**
-   * Assigns enumerable properties of the source object(s) to the `destination`
-   * object. Subsequent sources will overwrite propery assignments of previous
-   * sources.
-   *
-   * @static
-   * @memberOf _
-   * @category Objects
-   * @param {Object} object The destination object.
-   * @param {Object} [source1, source2, ...] The source objects.
-   * @returns {Object} Returns the destination object.
-   * @example
-   *
-   * _.extend({ 'name': 'moe' }, { 'age': 40 });
-   * // => { 'name': 'moe', 'age': 40 }
-   */
-  var extend = createIterator(extendIteratorOptions);
 
   /**
    * Creates a sorted array of all enumerable properties, own and inherited,
@@ -1630,10 +1633,14 @@
         stackA = args[3],
         stackB = args[4];
 
-    if (indicator !== objectRef) {
+    if (indicator !== indicatorObject) {
       stackA = [];
       stackB = [];
-      length = args.length;
+
+      // work with `_.reduce` by only using its callback `accumulator` and `value` arguments
+      if (typeof indicator != 'number') {
+        length = args.length;
+      }
     }
     while (++index < length) {
       forOwn(args[index], function(source, key) {
@@ -1658,7 +1665,7 @@
               : (isPlainObject(value) ? value : {})
             );
             // recursively merge objects and arrays (susceptible to call stack limits)
-            object[key] = merge(value, source, objectRef, stackA, stackB);
+            object[key] = merge(value, source, indicatorObject, stackA, stackB);
           }
         } else if (source != null) {
           object[key] = source;
@@ -1836,18 +1843,23 @@
    */
   function contains(collection, target, fromIndex) {
     var index = -1,
-        length = collection ? collection.length : 0;
+        length = collection ? collection.length : 0,
+        result = false;
 
     fromIndex = (fromIndex < 0 ? nativeMax(0, length + fromIndex) : fromIndex) || 0;
     if (typeof length == 'number') {
-      return (isString(collection)
+      result = (isString(collection)
         ? collection.indexOf(target, fromIndex)
         : indexOf(collection, target, fromIndex)
       ) > -1;
+    } else {
+      forEach(collection, function(value) {
+        if (++index >= fromIndex) {
+          return !(result = value === target);
+        }
+      });
     }
-    return some(collection, function(value) {
-      return ++index >= fromIndex && value === target;
-    });
+    return result;
   }
 
   /**
@@ -1947,11 +1959,24 @@
   function filter(collection, callback, thisArg) {
     var result = [];
     callback = createCallback(callback, thisArg);
-    forEach(collection, function(value, index, collection) {
-      if (callback(value, index, collection)) {
-        result.push(value);
+
+    if (isArray(collection)) {
+      var index = -1,
+          length = collection.length;
+
+      while (++index < length) {
+        var value = collection[index];
+        if (callback(value, index, collection)) {
+          result.push(value);
+        }
       }
-    });
+    } else {
+      forEach(collection, function(value, index, collection) {
+        if (callback(value, index, collection)) {
+          result.push(value);
+        }
+      });
+    }
     return result;
   }
 
@@ -2407,7 +2432,7 @@
    *  else `false`.
    * @example
    *
-   * _.some([null, 0, 'yes', false]);
+   * _.some([null, 0, 'yes', false], Boolean);
    * // => true
    */
   function some(collection, callback, thisArg) {
@@ -2419,7 +2444,7 @@
           length = collection.length;
 
       while (++index < length) {
-        if (result = callback(collection[index], index, collection)) {
+        if ((result = callback(collection[index], index, collection))) {
           break;
         }
       }
@@ -2519,10 +2544,7 @@
    * // => [{ 'name': 'moe', 'age': 40 }]
    */
   function where(collection, properties) {
-    var props = [];
-    forIn(properties, function(value, prop) {
-      props.push(prop);
-    });
+    var props = keys(properties);
     return filter(collection, function(object) {
       var length = props.length;
       while (length--) {
@@ -3226,6 +3248,44 @@
   }
 
   /**
+   * Creates a function that, when called, invokes the method at `object[key]`
+   * and prepends any additional `bindKey` arguments to those passed to the bound
+   * function. This method differs from `_.bind` by allowing bound functions to
+   * reference methods that will be redefined or don't yet exist.
+   * See http://michaux.ca/articles/lazy-function-definition-pattern.
+   *
+   * @static
+   * @memberOf _
+   * @category Functions
+   * @param {Object} object The object the method belongs to.
+   * @param {String} key The key of the method.
+   * @param {Mixed} [arg1, arg2, ...] Arguments to be partially applied.
+   * @returns {Function} Returns the new bound function.
+   * @example
+   *
+   * var object = {
+   *   'name': 'moe',
+   *   'greet': function(greeting) {
+   *     return greeting + ' ' + this.name;
+   *   }
+   * };
+   *
+   * var func = _.bindKey(object, 'greet', 'hi');
+   * func();
+   * // => 'hi moe'
+   *
+   * object.greet = function(greeting) {
+   *   return greeting + ', ' + this.name + '!';
+   * };
+   *
+   * func();
+   * // => 'hi, moe!'
+   */
+  function bindKey(object, key) {
+    return createBound(object, key, slice.call(arguments, 2));
+  }
+
+  /**
    * Creates a function that is the composition of the passed functions,
    * where each function consumes the return value of the function that follows.
    * In math terms, composing the functions `f()`, `g()`, and `h()` produces `f(g(h()))`.
@@ -3344,43 +3404,6 @@
   function defer(func) {
     var args = slice.call(arguments, 1);
     return setTimeout(function() { func.apply(undefined, args); }, 1);
-  }
-
-  /**
-   * Creates a function that, when called, invokes `object[methodName]` and
-   * prepends any additional `lateBind` arguments to those passed to the bound
-   * function. This method differs from `_.bind` by allowing bound functions to
-   * reference methods that will be redefined or don't yet exist.
-   *
-   * @static
-   * @memberOf _
-   * @category Functions
-   * @param {Object} object The object the method belongs to.
-   * @param {String} methodName The method name.
-   * @param {Mixed} [arg1, arg2, ...] Arguments to be partially applied.
-   * @returns {Function} Returns the new bound function.
-   * @example
-   *
-   * var object = {
-   *   'name': 'moe',
-   *   'greet': function(greeting) {
-   *     return greeting + ' ' + this.name;
-   *   }
-   * };
-   *
-   * var func = _.lateBind(object, 'greet', 'hi');
-   * func();
-   * // => 'hi moe'
-   *
-   * object.greet = function(greeting) {
-   *   return greeting + ', ' + this.name + '!';
-   * };
-   *
-   * func();
-   * // => 'hi, moe!'
-   */
-  function lateBind(object, methodName) {
-    return createBound(methodName, object, slice.call(arguments, 2));
   }
 
   /**
@@ -4057,12 +4080,14 @@
    * @memberOf _
    * @type String
    */
-  lodash.VERSION = '0.9.2';
+  lodash.VERSION = '0.10.0';
 
   // assign static methods
+  lodash.assign = assign;
   lodash.after = after;
   lodash.bind = bind;
   lodash.bindAll = bindAll;
+  lodash.bindKey = bindKey;
   lodash.chain = chain;
   lodash.clone = clone;
   lodash.compact = compact;
@@ -4076,7 +4101,6 @@
   lodash.difference = difference;
   lodash.escape = escape;
   lodash.every = every;
-  lodash.extend = extend;
   lodash.filter = filter;
   lodash.find = find;
   lodash.first = first;
@@ -4113,7 +4137,6 @@
   lodash.keys = keys;
   lodash.last = last;
   lodash.lastIndexOf = lastIndexOf;
-  lodash.lateBind = lateBind;
   lodash.map = map;
   lodash.max = max;
   lodash.memoize = memoize;
@@ -4162,6 +4185,7 @@
   lodash.detect = find;
   lodash.drop = rest;
   lodash.each = forEach;
+  lodash.extend = assign;
   lodash.foldl = reduce;
   lodash.foldr = reduceRight;
   lodash.head = first;
