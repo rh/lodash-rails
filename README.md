@@ -18,6 +18,13 @@ Add the necessary library to `app/assets/javascripts/application.js`:
 
 ## What's included?
 
-* Lo-Dash 1.0.1 (lodash, lodash.min)
+Lo-Dash 1.1.0:
+
+* lodash.js
+* lodash.min.js
+* lodash.compat.js
+* lodash.compat.min.js
+* lodash.underscore.js
+* lodash.underscore.min.js
 
 Copyright Richard Hubers, released under the MIT License.
