@@ -1,6 +1,6 @@
 /**
  * @license
- * Lo-Dash 1.1.0 (Custom Build) <http://lodash.com/>
+ * Lo-Dash 1.1.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash underscore exports="amd,commonjs,global,node" -o ./dist/lodash.underscore.js`
  * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.4.4 <http://underscorejs.org/>
@@ -705,7 +705,6 @@
     var index, iterable = collection, result = iterable;
     if (!iterable) return result;
     if (!objectTypes[typeof iterable]) return result;
-    callback || (callback = identity);
 
       for (index in iterable) {
         if (callback(iterable[index], index, collection) === indicatorObject) return result;    
@@ -738,7 +737,6 @@
     var index, iterable = collection, result = iterable;
     if (!iterable) return result;
     if (!objectTypes[typeof iterable]) return result;
-    callback || (callback = identity);
 
       for (index in iterable) {
         if (hasOwnProperty.call(iterable, index)) {    
@@ -1683,15 +1681,15 @@
     var index = -1,
         length = collection ? collection.length : 0;
 
+    callback = callback && typeof thisArg == 'undefined' ? callback : createCallback(callback, thisArg);
     if (typeof length == 'number') {
-      callback = callback && typeof thisArg == 'undefined' ? callback : createCallback(callback, thisArg);
       while (++index < length) {
         if (callback(collection[index], index, collection) === indicatorObject) {
           break;
         }
       }
     } else {
-      forOwn(collection, callback, thisArg);
+      forOwn(collection, callback);
     };
   }
 
@@ -4282,7 +4280,7 @@
    * @memberOf _
    * @type String
    */
-  lodash.VERSION = '1.1.0';
+  lodash.VERSION = '1.1.1';
 
   // add functions to `lodash.prototype`
   mixin(lodash);
