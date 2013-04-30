@@ -1,6 +1,6 @@
 /**
  * @license
- * Lo-Dash 1.2.0 (Custom Build) <http://lodash.com/>
+ * Lo-Dash 1.2.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash -o ./dist/lodash.compat.js`
  * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.4.4 <http://underscorejs.org/>
@@ -56,8 +56,20 @@
   /** Used to match "interpolate" template delimiters */
   var reInterpolate = /<%=([\s\S]+?)%>/g;
 
-  /** Used to match leading zeros to be removed */
-  var reLeadingZeros = /^0+(?=.$)/;
+  /** Used to detect and test whitespace */
+  var whitespace = (
+    // whitespace
+    ' \t\x0B\f\xA0\ufeff' +
+
+    // line terminators
+    '\n\r\u2028\u2029' +
+
+    // unicode category "Zs" space separators
+    '\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000'
+  );
+
+  /** Used to match leading whitespace and zeros to be removed */
+  var reLeadingSpacesAndZeros = RegExp('^[' + whitespace + ']*0+(?=.$)');
 
   /** Used to ensure capturing order of template delimiters */
   var reNoMatch = /($^)/;
@@ -935,6 +947,26 @@
     }
 
     /**
+     * Checks if `value` is an array.
+     *
+     * @static
+     * @memberOf _
+     * @category Objects
+     * @param {Mixed} value The value to check.
+     * @returns {Boolean} Returns `true`, if the `value` is an array, else `false`.
+     * @example
+     *
+     * (function() { return _.isArray(arguments); })();
+     * // => false
+     *
+     * _.isArray([1, 2, 3]);
+     * // => true
+     */
+    var isArray = nativeIsArray || function(value) {
+      return value ? (typeof value == 'object' && toString.call(value) == arrayClass) : false;
+    };
+
+    /**
      * A fallback implementation of `Object.keys` which produces an array of the
      * given object's own enumerable property names.
      *
@@ -1407,29 +1439,6 @@
     }
 
     /**
-     * Checks if `value` is an array.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {Mixed} value The value to check.
-     * @returns {Boolean} Returns `true`, if the `value` is an array, else `false`.
-     * @example
-     *
-     * (function() { return _.isArray(arguments); })();
-     * // => false
-     *
-     * _.isArray([1, 2, 3]);
-     * // => true
-     */
-    function isArray(value) {
-      // `instanceof` may cause a memory leak in IE 7 if `value` is a host object
-      // http://ajaxian.com/archives/working-aroung-the-instanceof-memory-leak
-      return (support.argsObject && value instanceof Array) ||
-        (nativeIsArray ? nativeIsArray(value) : toString.call(value) == arrayClass);
-    }
-
-    /**
      * Checks if `value` is a boolean value.
      *
      * @static
@@ -1460,7 +1469,7 @@
      * // => true
      */
     function isDate(value) {
-      return value instanceof Date || toString.call(value) == dateClass;
+      return value ? (typeof value == 'object' && toString.call(value) == dateClass) : false;
     }
 
     /**
@@ -1764,7 +1773,7 @@
     // fallback for older versions of Chrome and Safari
     if (isFunction(/x/)) {
       isFunction = function(value) {
-        return value instanceof Function || toString.call(value) == funcClass;
+        return typeof value == 'function' && toString.call(value) == funcClass;
       };
     }
 
@@ -1914,7 +1923,7 @@
      * // => true
      */
     function isRegExp(value) {
-      return value instanceof RegExp || toString.call(value) == regexpClass;
+      return value ? (objectTypes[typeof value] && toString.call(value) == regexpClass) : false;
     }
 
     /**
@@ -3430,7 +3439,7 @@
     /**
      * Flattens a nested array (the nesting can be to any depth). If `isShallow`
      * is truthy, `array` will only be flattened a single level. If `callback`
-     * is passed, each element of `array` is passed through a callback` before
+     * is passed, each element of `array` is passed through a `callback` before
      * flattening. The `callback` is bound to `thisArg` and invoked with three
      * arguments; (value, index, array).
      *
@@ -3989,7 +3998,7 @@
      * Creates a duplicate-value-free version of the `array` using strict equality
      * for comparisons, i.e. `===`. If the `array` is already sorted, passing `true`
      * for `isSorted` will run a faster algorithm. If `callback` is passed, each
-     * element of `array` is passed through a callback` before uniqueness is computed.
+     * element of `array` is passed through a `callback` before uniqueness is computed.
      * The `callback` is bound to `thisArg` and invoked with three arguments; (value, index, array).
      *
      * If a property name is passed for `callback`, the created "_.pluck" style
@@ -4452,6 +4461,10 @@
      * and/or trailing edge of the `wait` timeout. Subsequent calls to the debounced
      * function will return the result of the last `func` call.
      *
+     * Note: If `leading` and `trailing` options are `true`, `func` will be called
+     * on the trailing edge of the timeout only if the the debounced function is
+     * invoked more than once during the `wait` timeout.
+     *
      * @static
      * @memberOf _
      * @category Functions
@@ -4465,16 +4478,22 @@
      *
      * var lazyLayout = _.debounce(calculateLayout, 300);
      * jQuery(window).on('resize', lazyLayout);
+     *
+     * jQuery('#postbox').on('click', _.debounce(sendMail, 200, {
+     *   'leading': true,
+     *   'trailing': false
+     * });
      */
     function debounce(func, wait, options) {
       var args,
+          inited,
           result,
           thisArg,
           timeoutId,
           trailing = true;
 
       function delayed() {
-        timeoutId = null;
+        inited = timeoutId = null;
         if (trailing) {
           result = func.apply(thisArg, args);
         }
@@ -4487,15 +4506,15 @@
         trailing = 'trailing' in options ? options.trailing : trailing;
       }
       return function() {
-        var isLeading = leading && !timeoutId;
         args = arguments;
         thisArg = this;
-
         clearTimeout(timeoutId);
-        timeoutId = setTimeout(delayed, wait);
 
-        if (isLeading) {
+        if (!inited && leading) {
+          inited = true;
           result = func.apply(thisArg, args);
+        } else {
+          timeoutId = setTimeout(delayed, wait);
         }
         return result;
       };
@@ -4665,12 +4684,14 @@
 
     /**
      * Creates a function that, when executed, will only call the `func` function
-     * at most once per every `wait` milliseconds. If the throttled function is
-     * invoked more than once during the `wait` timeout, `func` will also be called
-     * on the trailing edge of the timeout. Pass an `options` object to indicate
-     * that `func` should be invoked on the leading and/or trailing edge of the
-     * `wait` timeout. Subsequent calls to the throttled function will return
-     * the result of the last `func` call.
+     * at most once per every `wait` milliseconds. Pass an `options` object to
+     * indicate that `func` should be invoked on the leading and/or trailing edge
+     * of the `wait` timeout. Subsequent calls to the throttled function will
+     * return the result of the last `func` call.
+     *
+     * Note: If `leading` and `trailing` options are `true`, `func` will be called
+     * on the trailing edge of the timeout only if the the throttled function is
+     * invoked more than once during the `wait` timeout.
      *
      * @static
      * @memberOf _
@@ -4685,6 +4706,10 @@
      *
      * var throttled = _.throttle(updatePosition, 100);
      * jQuery(window).on('scroll', throttled);
+     *
+     * jQuery('.interactive').on('click', _.throttle(renewToken, 300000, {
+     *   'trailing': false
+     * }));
      */
     function throttle(func, wait, options) {
       var args,
@@ -4696,10 +4721,9 @@
           trailing = true;
 
       function trailingCall() {
-        lastCalled = new Date;
         timeoutId = null;
-
         if (trailing) {
+          lastCalled = new Date;
           result = func.apply(thisArg, args);
         }
       }
@@ -4856,6 +4880,8 @@
 
     /**
      * Converts the given `value` into an integer of the specified `radix`.
+     * If `radix` is `undefined` or `0`, a `radix` of `10` is used unless the
+     * `value` is a hexadecimal, in which case a `radix` of `16` is used.
      *
      * Note: This method avoids differences in native ES3 and ES5 `parseInt`
      * implementations. See http://es5.github.com/#E.
@@ -4863,16 +4889,17 @@
      * @static
      * @memberOf _
      * @category Utilities
-     * @param {Mixed} value The value to parse.
+     * @param {String} value The value to parse.
+     * @param {Number} [radix] The radix used to interpret the value to parse.
      * @returns {Number} Returns the new integer value.
      * @example
      *
      * _.parseInt('08');
      * // => 8
      */
-    var parseInt = nativeParseInt('08') == 8 ? nativeParseInt : function(value, radix) {
+    var parseInt = nativeParseInt(whitespace + '08') == 8 ? nativeParseInt : function(value, radix) {
       // Firefox and Opera still follow the ES3 specified implementation of `parseInt`
-      return nativeParseInt(isString(value) ? value.replace(reLeadingZeros, '') : value, radix || 0);
+      return nativeParseInt(isString(value) ? value.replace(reLeadingSpacesAndZeros, '') : value, radix || 0);
     };
 
     /**
@@ -5425,7 +5452,7 @@
      * @memberOf _
      * @type String
      */
-    lodash.VERSION = '1.2.0';
+    lodash.VERSION = '1.2.1';
 
     // add "Chaining" functions to the wrapper
     lodash.prototype.toString = wrapperToString;

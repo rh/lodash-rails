@@ -1,6 +1,6 @@
 /**
  * @license
- * Lo-Dash 1.2.0 (Custom Build) <http://lodash.com/>
+ * Lo-Dash 1.2.1 (Custom Build) <http://lodash.com/>
  * Build: `lodash underscore exports="amd,commonjs,global,node" -o ./dist/lodash.underscore.js`
  * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.4.4 <http://underscorejs.org/>
@@ -220,14 +220,6 @@
 
   (function() {
     var object = { '0': 1, 'length': 1 };
-
-    /**
-     * Detect if `arguments` objects are `Object` objects (all but Narwhal and Opera < 10.5).
-     *
-     * @memberOf _.support
-     * @type Boolean
-     */
-    support.argsObject = arguments.constructor == Object && !(arguments instanceof Array);
 
     /**
      * Detect if `Function#bind` exists and is inferred to be fast (all but V8).
@@ -482,6 +474,26 @@
       return value ? hasOwnProperty.call(value, 'callee') : false;
     };
   }
+
+  /**
+   * Checks if `value` is an array.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {Mixed} value The value to check.
+   * @returns {Boolean} Returns `true`, if the `value` is an array, else `false`.
+   * @example
+   *
+   * (function() { return _.isArray(arguments); })();
+   * // => false
+   *
+   * _.isArray([1, 2, 3]);
+   * // => true
+   */
+  var isArray = nativeIsArray || function(value) {
+    return value ? (typeof value == 'object' && toString.call(value) == arrayClass) : false;
+  };
 
   /**
    * A fallback implementation of `Object.keys` which produces an array of the
@@ -821,26 +833,6 @@
   }
 
   /**
-   * Checks if `value` is an array.
-   *
-   * @static
-   * @memberOf _
-   * @category Objects
-   * @param {Mixed} value The value to check.
-   * @returns {Boolean} Returns `true`, if the `value` is an array, else `false`.
-   * @example
-   *
-   * (function() { return _.isArray(arguments); })();
-   * // => false
-   *
-   * _.isArray([1, 2, 3]);
-   * // => true
-   */
-  var isArray = nativeIsArray || function(value) {
-    return toString.call(value) == arrayClass;
-  };
-
-  /**
    * Checks if `value` is a boolean value.
    *
    * @static
@@ -871,7 +863,7 @@
    * // => true
    */
   function isDate(value) {
-    return toString.call(value) == dateClass;
+    return value ? (typeof value == 'object' && toString.call(value) == dateClass) : false;
   }
 
   /**
@@ -1116,7 +1108,7 @@
   // fallback for older versions of Chrome and Safari
   if (isFunction(/x/)) {
     isFunction = function(value) {
-      return toString.call(value) == funcClass;
+      return typeof value == 'function' && toString.call(value) == funcClass;
     };
   }
 
@@ -1230,7 +1222,7 @@
    * // => true
    */
   function isRegExp(value) {
-    return toString.call(value) == regexpClass;
+    return value ? (objectTypes[typeof value] && toString.call(value) == regexpClass) : false;
   }
 
   /**
@@ -2552,7 +2544,7 @@
   /**
    * Flattens a nested array (the nesting can be to any depth). If `isShallow`
    * is truthy, `array` will only be flattened a single level. If `callback`
-   * is passed, each element of `array` is passed through a callback` before
+   * is passed, each element of `array` is passed through a `callback` before
    * flattening. The `callback` is bound to `thisArg` and invoked with three
    * arguments; (value, index, array).
    *
@@ -3086,7 +3078,7 @@
    * Creates a duplicate-value-free version of the `array` using strict equality
    * for comparisons, i.e. `===`. If the `array` is already sorted, passing `true`
    * for `isSorted` will run a faster algorithm. If `callback` is passed, each
-   * element of `array` is passed through a callback` before uniqueness is computed.
+   * element of `array` is passed through a `callback` before uniqueness is computed.
    * The `callback` is bound to `thisArg` and invoked with three arguments; (value, index, array).
    *
    * If a property name is passed for `callback`, the created "_.pluck" style
@@ -3468,6 +3460,10 @@
    * and/or trailing edge of the `wait` timeout. Subsequent calls to the debounced
    * function will return the result of the last `func` call.
    *
+   * Note: If `leading` and `trailing` options are `true`, `func` will be called
+   * on the trailing edge of the timeout only if the the debounced function is
+   * invoked more than once during the `wait` timeout.
+   *
    * @static
    * @memberOf _
    * @category Functions
@@ -3481,6 +3477,11 @@
    *
    * var lazyLayout = _.debounce(calculateLayout, 300);
    * jQuery(window).on('resize', lazyLayout);
+   *
+   * jQuery('#postbox').on('click', _.debounce(sendMail, 200, {
+   *   'leading': true,
+   *   'trailing': false
+   * });
    */
   function debounce(func, wait, immediate) {
     var args,
@@ -3638,12 +3639,14 @@
 
   /**
    * Creates a function that, when executed, will only call the `func` function
-   * at most once per every `wait` milliseconds. If the throttled function is
-   * invoked more than once during the `wait` timeout, `func` will also be called
-   * on the trailing edge of the timeout. Pass an `options` object to indicate
-   * that `func` should be invoked on the leading and/or trailing edge of the
-   * `wait` timeout. Subsequent calls to the throttled function will return
-   * the result of the last `func` call.
+   * at most once per every `wait` milliseconds. Pass an `options` object to
+   * indicate that `func` should be invoked on the leading and/or trailing edge
+   * of the `wait` timeout. Subsequent calls to the throttled function will
+   * return the result of the last `func` call.
+   *
+   * Note: If `leading` and `trailing` options are `true`, `func` will be called
+   * on the trailing edge of the timeout only if the the throttled function is
+   * invoked more than once during the `wait` timeout.
    *
    * @static
    * @memberOf _
@@ -3658,6 +3661,10 @@
    *
    * var throttled = _.throttle(updatePosition, 100);
    * jQuery(window).on('scroll', throttled);
+   *
+   * jQuery('.interactive').on('click', _.throttle(renewToken, 300000, {
+   *   'trailing': false
+   * }));
    */
   function throttle(func, wait) {
     var args,
@@ -4325,7 +4332,7 @@
    * @memberOf _
    * @type String
    */
-  lodash.VERSION = '1.2.0';
+  lodash.VERSION = '1.2.1';
 
   // add functions to `lodash.prototype`
   mixin(lodash);
