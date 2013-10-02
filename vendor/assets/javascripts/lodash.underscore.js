@@ -1,6 +1,6 @@
 /**
  * @license
- * Lo-Dash 2.1.0 (Custom Build) <http://lodash.com/>
+ * Lo-Dash 2.2.0 (Custom Build) <http://lodash.com/>
  * Build: `lodash underscore exports="amd,commonjs,global,node" -o ./dist/lodash.underscore.js`
  * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
@@ -26,9 +26,6 @@
 
   /** Used to ensure capturing order of template delimiters */
   var reNoMatch = /($^)/;
-
-  /** Used to detect functions containing a `this` reference */
-  var reThis = /\bthis\b/;
 
   /** Used to match unescaped characters in compiled string literals */
   var reUnescapedString = /['\n\r\t\u2028\u2029\\]/g;
@@ -185,6 +182,7 @@
   var ceil = Math.ceil,
       floor = Math.floor,
       hasOwnProperty = objectProto.hasOwnProperty,
+      now = reNative.test(now = Date.now) && now || function() { return +new Date; },
       push = arrayRef.push,
       toString = objectProto.toString,
       unshift = arrayRef.unshift;
@@ -309,15 +307,6 @@
      * @type boolean
      */
     support.fastBind = nativeBind && !isV8;
-
-    /**
-     * Detect if functions can be decompiled by `Function#toString`
-     * (all but PS3 and older Opera mobile browsers & avoided in Windows 8 apps).
-     *
-     * @memberOf _.support
-     * @type boolean
-     */
-    support.funcDecomp = !reNative.test(root.WinRTError) && reThis.test(function() { return this; });
 
     /**
      * Detect if `Array#shift` and `Array#splice` augment array-like objects correctly.
@@ -958,7 +947,7 @@
    * @param {boolean} [deep=false] Specify a deep clone.
    * @param {Function} [callback] The function to customize cloning values.
    * @param {*} [thisArg] The `this` binding of `callback`.
-   * @returns {*} Returns the cloned `value`.
+   * @returns {*} Returns the cloned value.
    * @example
    *
    * var stooges = [
@@ -3791,7 +3780,7 @@
       trailing = 'trailing' in options ? options.trailing : trailing;
     }
     var delayed = function() {
-      var remaining = wait - (new Date - stamp);
+      var remaining = wait - (now() - stamp);
       if (remaining <= 0) {
         if (maxTimeoutId) {
           clearTimeout(maxTimeoutId);
@@ -3799,7 +3788,7 @@
         var isCalled = trailingCall;
         maxTimeoutId = timeoutId = trailingCall = undefined;
         if (isCalled) {
-          lastCalled = +new Date;
+          lastCalled = now();
           result = func.apply(thisArg, args);
         }
       } else {
@@ -3813,14 +3802,14 @@
       }
       maxTimeoutId = timeoutId = trailingCall = undefined;
       if (trailing || (maxWait !== wait)) {
-        lastCalled = +new Date;
+        lastCalled = now();
         result = func.apply(thisArg, args);
       }
     };
 
     return function() {
       args = arguments;
-      stamp = +new Date;
+      stamp = now();
       thisArg = this;
       trailingCall = trailing && (timeoutId || !leading);
 
@@ -4707,7 +4696,7 @@
    * @memberOf _
    * @type string
    */
-  lodash.VERSION = '2.1.0';
+  lodash.VERSION = '2.2.0';
 
   // add "Chaining" functions to the wrapper
   lodash.prototype.chain = wrapperChain;
