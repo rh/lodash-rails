@@ -18,7 +18,7 @@ Add the necessary library to `app/assets/javascripts/application.js`:
 
 ## What's included?
 
-Lo-Dash 2.4.0:
+Lo-Dash 2.4.1:
 
 * lodash.js
 * lodash.min.js
