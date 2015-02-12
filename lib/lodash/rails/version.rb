@@ -1,5 +1,5 @@
 module LoDash
   module Rails
-    VERSION = "2.4.1"
+    VERSION = "3.1.0"
   end
 end
