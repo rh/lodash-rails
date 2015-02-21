@@ -3,8 +3,8 @@ require File.expand_path('../lib/lodash/rails/version', __FILE__)
 Gem::Specification.new do |s|
   s.name = 'lodash-rails'
   s.version = LoDash::Rails::VERSION
-  s.description = 'Lo-Dash for the Rails asset pipeline'
-  s.summary = 'This gem makes Lo-Dash available for the Rails asset pipeline'
+  s.description = 'lodash for the Rails asset pipeline'
+  s.summary = 'This gem makes lodash available for the Rails asset pipeline'
   s.authors = ['Richard Hubers']
   s.email = ['richard.hubers@gmail.com']
   s.date = Time.now.strftime('%Y-%m-%d')

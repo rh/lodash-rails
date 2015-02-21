@@ -1,6 +1,6 @@
 # lodash-rails
 
-[Lo-Dash](http://lodash.com/) for the Rails asset pipeline.
+[lodash](http://lodash.com/) for the Rails asset pipeline.
 
 ## Installation
 
@@ -18,7 +18,7 @@ Add the necessary library to `app/assets/javascripts/application.js`:
 
 ## What's included?
 
-Lo-Dash 3.1.0:
+lodash 3.1.0:
 
 * lodash.js
 * lodash.min.js
