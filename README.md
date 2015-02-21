@@ -18,11 +18,9 @@ Add the necessary library to `app/assets/javascripts/application.js`:
 
 ## What's included?
 
-lodash 3.1.0:
+lodash 3.2.0:
 
 * lodash.js
 * lodash.min.js
-* lodash.compat.js
-* lodash.compat.min.js
 
 Copyright Richard Hubers, released under the MIT License.
