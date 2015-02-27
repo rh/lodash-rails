@@ -22,5 +22,7 @@ lodash 3.3.1:
 
 * lodash.js
 * lodash.min.js
+* lodash.compat.js
+* lodash.compat.min.js
 
 Copyright Richard Hubers, released under the MIT License.
