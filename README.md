@@ -18,7 +18,7 @@ Add the necessary library to `app/assets/javascripts/application.js`:
 
 ## What's included?
 
-lodash 4.0.0:
+lodash 4.3.0:
 
 * lodash.core.js
 * lodash.core.min.js

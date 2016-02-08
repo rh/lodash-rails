@@ -1,6 +1,6 @@
 /**
  * @license
- * lodash 4.0.0 (Custom Build) <https://lodash.com/>
+ * lodash 4.3.0 (Custom Build) <https://lodash.com/>
  * Build: `lodash core -o ./dist/lodash.core.js`
  * Copyright 2012-2016 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
@@ -13,7 +13,7 @@
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.0.0';
+  var VERSION = '4.3.0';
 
   /** Used to compose bitmasks for wrapper metadata. */
   var BIND_FLAG = 1,
@@ -159,7 +159,7 @@
   /**
    * The base implementation of methods like `_.find` and `_.findKey`, without
    * support for iteratee shorthands, which iterates over `collection` using
-   * the provided `eachFunc`.
+   * `eachFunc`.
    *
    * @private
    * @param {Array|Object} collection The collection to search.
@@ -181,21 +181,20 @@
 
   /**
    * The base implementation of `_.reduce` and `_.reduceRight`, without support
-   * for iteratee shorthands, which iterates over `collection` using the provided
-   * `eachFunc`.
+   * for iteratee shorthands, which iterates over `collection` using `eachFunc`.
    *
    * @private
    * @param {Array|Object} collection The collection to iterate over.
    * @param {Function} iteratee The function invoked per iteration.
    * @param {*} accumulator The initial value.
-   * @param {boolean} initFromCollection Specify using the first or last element of `collection` as the initial value.
+   * @param {boolean} initAccum Specify using the first or last element of `collection` as the initial value.
    * @param {Function} eachFunc The function to iterate over `collection`.
    * @returns {*} Returns the accumulated value.
    */
-  function baseReduce(collection, iteratee, accumulator, initFromCollection, eachFunc) {
+  function baseReduce(collection, iteratee, accumulator, initAccum, eachFunc) {
     eachFunc(collection, function(value, index, collection) {
-      accumulator = initFromCollection
-        ? (initFromCollection = false, value)
+      accumulator = initAccum
+        ? (initAccum = false, value)
         : iteratee(accumulator, value, index, collection);
     });
     return accumulator;
@@ -362,8 +361,8 @@
   var oldDash = root._;
 
   /** Built-in value references. */
-  var _Symbol = root.Symbol,
-      Reflect = root.Reflect,
+  var Reflect = root.Reflect,
+      Symbol = root.Symbol,
       Uint8Array = root.Uint8Array,
       enumerate = Reflect ? Reflect.enumerate : undefined,
       propertyIsEnumerable = objectProto.propertyIsEnumerable;
@@ -416,47 +415,48 @@
    * The chainable wrapper methods are:
    * `after`, `ary`, `assign`, `assignIn`, `assignInWith`, `assignWith`,
    * `at`, `before`, `bind`, `bindAll`, `bindKey`, `chain`, `chunk`, `commit`,
-   * `compact`, `concat`, `conforms`,  `constant`, `countBy`, `create`, `curry`,
+   * `compact`, `concat`, `conforms`, `constant`, `countBy`, `create`, `curry`,
    * `debounce`, `defaults`, `defaultsDeep`, `defer`, `delay`, `difference`,
-   * `differenceBy`, `differenceWith`,  `drop`, `dropRight`, `dropRightWhile`,
+   * `differenceBy`, `differenceWith`, `drop`, `dropRight`, `dropRightWhile`,
    * `dropWhile`, `fill`, `filter`, `flatten`, `flattenDeep`, `flip`, `flow`,
-   * `flowRight`, `forEach`, `forEachRight`, `forIn`, `forInRight`, `forOwn`,
-   * `forOwnRight`, `fromPairs`, `functions`, `functionsIn`, `groupBy`, `initial`,
-   * `intersection`, `intersectionBy`, `intersectionWith`, invert`, `invokeMap`,
-   * `iteratee`, `keyBy`, `keys`, `keysIn`, `map`, `mapKeys`, `mapValues`,
-   * `matches`, `matchesProperty`, `memoize`, `merge`, `mergeWith`, `method`,
-   * `methodOf`, `mixin`, `negate`, `nthArg`, `omit`, `omitBy`, `once`, `orderBy`,
-   * `over`, `overArgs`, `overEvery`, `overSome`, `partial`, `partialRight`,
-   * `partition`, `pick`, `pickBy`, `plant`, `property`, `propertyOf`, `pull`,
-   * `pullAll`, `pullAllBy`, `pullAt`, `push`, `range`, `rangeRight`, `rearg`,
-   * `reject`, `remove`, `rest`, `reverse`, `sampleSize`, `set`, `setWith`,
-   * `shuffle`, `slice`, `sort`, `sortBy`, `splice`, `spread`, `tail`, `take`,
-   * `takeRight`, `takeRightWhile`, `takeWhile`, `tap`, `throttle`, `thru`,
-   * `toArray`, `toPairs`, `toPairsIn`, `toPath`, `toPlainObject`, `transform`,
-   * `unary`, `union`, `unionBy`, `unionWith`, `uniq`, `uniqBy`, `uniqWith`,
-   * `unset`, `unshift`, `unzip`, `unzipWith`, `values`, `valuesIn`, `without`,
-   * `wrap`, `xor`, `xorBy`, `xorWith`, `zip`, `zipObject`, and `zipWith`
+   * `flowRight`, `fromPairs`, `functions`, `functionsIn`, `groupBy`, `initial`,
+   * `intersection`, `intersectionBy`, `intersectionWith`, `invert`, `invertBy`,
+   * `invokeMap`, `iteratee`, `keyBy`, `keys`, `keysIn`, `map`, `mapKeys`,
+   * `mapValues`, `matches`, `matchesProperty`, `memoize`, `merge`, `mergeWith`,
+   * `method`, `methodOf`, `mixin`, `negate`, `nthArg`, `omit`, `omitBy`, `once`,
+   * `orderBy`, `over`, `overArgs`, `overEvery`, `overSome`, `partial`,
+   * `partialRight`, `partition`, `pick`, `pickBy`, `plant`, `property`,
+   * `propertyOf`, `pull`, `pullAll`, `pullAllBy`, `pullAt`, `push`, `range`,
+   * `rangeRight`, `rearg`, `reject`, `remove`, `rest`, `reverse`, `sampleSize`,
+   * `set`, `setWith`, `shuffle`, `slice`, `sort`, `sortBy`, `splice`, `spread`,
+   * `tail`, `take`, `takeRight`, `takeRightWhile`, `takeWhile`, `tap`, `throttle`,
+   * `thru`, `toArray`, `toPairs`, `toPairsIn`, `toPath`, `toPlainObject`,
+   * `transform`, `unary`, `union`, `unionBy`, `unionWith`, `uniq`, `uniqBy`,
+   * `uniqWith`, `unset`, `unshift`, `unzip`, `unzipWith`, `values`, `valuesIn`,
+   * `without`, `wrap`, `xor`, `xorBy`, `xorWith`, `zip`, `zipObject`,
+   * `zipObjectDeep`, and `zipWith`
    *
    * The wrapper methods that are **not** chainable by default are:
    * `add`, `attempt`, `camelCase`, `capitalize`, `ceil`, `clamp`, `clone`,
    * `cloneDeep`, `cloneDeepWith`, `cloneWith`, `deburr`, `endsWith`, `eq`,
    * `escape`, `escapeRegExp`, `every`, `find`, `findIndex`, `findKey`,
-   * `findLast`, `findLastIndex`, `findLastKey`, `floor`, `get`, `gt`, `gte`,
-   * `has`, `hasIn`, `head`, `identity`, `includes`, `indexOf`, `inRange`,
-   * `invoke`, `isArguments`, `isArray`, `isArrayLike`, `isArrayLikeObject`,
-   * `isBoolean`, `isDate`, `isElement`, `isEmpty`, `isEqual`, `isEqualWith`,
-   * `isError`, `isFinite`, `isFunction`, `isInteger`, `isLength`, `isMatch`,
-   * `isMatchWith`, `isNaN`, `isNative`, `isNil`, `isNull`, `isNumber`,
-   * `isObject`, `isObjectLike`, `isPlainObject`, `isRegExp`, `isSafeInteger`,
-   * `isString`, `isUndefined`, `isTypedArray`, `join`, `kebabCase`, `last`,
-   * `lastIndexOf`, `lowerCase`, `lowerFirst`, `lt`, `lte`, `max`, `maxBy`,
-   * `mean`, `min`, `minBy`, `noConflict`, `noop`, `now`, `pad`, `padEnd`,
-   * `padStart`, `parseInt`, `pop`, `random`, `reduce`, `reduceRight`, `repeat`,
-   * `result`, `round`, `runInContext`, `sample`, `shift`, `size`, `snakeCase`,
-   * `some`, `sortedIndex`, `sortedIndexBy`, `sortedLastIndex`, `sortedLastIndexBy`,
-   * `startCase`, `startsWith`, `subtract`, `sum`, sumBy`, `template`, `times`,
-   * `toLower`, `toInteger`, `toLength`, `toNumber`, `toSafeInteger`, toString`,
-   * `toUpper`, `trim`, `trimEnd`, `trimStart`, `truncate`, `unescape`, `uniqueId`,
+   * `findLast`, `findLastIndex`, `findLastKey`, `floor`, `forEach`, `forEachRight`,
+   * `forIn`, `forInRight`, `forOwn`, `forOwnRight`, `get`, `gt`, `gte`, `has`,
+   * `hasIn`, `head`, `identity`, `includes`, `indexOf`, `inRange`, `invoke`,
+   * `isArguments`, `isArray`, `isArrayLike`, `isArrayLikeObject`, `isBoolean`,
+   * `isDate`, `isElement`, `isEmpty`, `isEqual`, `isEqualWith`, `isError`,
+   * `isFinite`, `isFunction`, `isInteger`, `isLength`, `isMatch`, `isMatchWith`,
+   * `isNaN`, `isNative`, `isNil`, `isNull`, `isNumber`, `isObject`, `isObjectLike`,
+   * `isPlainObject`, `isRegExp`, `isSafeInteger`, `isString`, `isUndefined`,
+   * `isTypedArray`, `join`, `kebabCase`, `last`, `lastIndexOf`, `lowerCase`,
+   * `lowerFirst`, `lt`, `lte`, `max`, `maxBy`, `mean`, `min`, `minBy`,
+   * `noConflict`, `noop`, `now`, `pad`, `padEnd`, `padStart`, `parseInt`,
+   * `pop`, `random`, `reduce`, `reduceRight`, `repeat`, `result`, `round`,
+   * `runInContext`, `sample`, `shift`, `size`, `snakeCase`, `some`, `sortedIndex`,
+   * `sortedIndexBy`, `sortedLastIndex`, `sortedLastIndexBy`, `startCase`,
+   * `startsWith`, `subtract`, `sum`, `sumBy`, `template`, `times`, `toLower`,
+   * `toInteger`, `toLength`, `toNumber`, `toSafeInteger`, `toString`, `toUpper`,
+   * `trim`, `trimEnd`, `trimStart`, `truncate`, `unescape`, `uniqueId`,
    * `upperCase`, `upperFirst`, `value`, and `words`
    *
    * @name _
@@ -472,11 +472,11 @@
    *
    * var wrapped = _([1, 2, 3]);
    *
-   * // returns an unwrapped value
+   * // Returns an unwrapped value.
    * wrapped.reduce(_.add);
    * // => 6
    *
-   * // returns a wrapped value
+   * // Returns a wrapped value.
    * var squares = wrapped.map(square);
    *
    * _.isArray(squares);
@@ -576,7 +576,7 @@
    * @private
    * @param {Function} func The function to delay.
    * @param {number} wait The number of milliseconds to delay invocation.
-   * @param {Object} args The arguments provide to `func`.
+   * @param {Object} args The arguments to provide to `func`.
    * @returns {number} Returns the timer id.
    */
   function baseDelay(func, wait, args) {
@@ -692,7 +692,7 @@
 
   /**
    * The base implementation of `_.functions` which creates an array of
-   * `object` function property names filtered from those provided.
+   * `object` function property names filtered from `props`.
    *
    * @private
    * @param {Object} object The object to inspect.
@@ -875,17 +875,18 @@
    * @returns {Function} Returns the new function.
    */
   function baseMatches(source) {
-    var props = keys(source),
-        length = props.length;
-
+    var props = keys(source);
     return function(object) {
+      var length = props.length;
       if (object == null) {
         return !length;
       }
       object = Object(object);
       while (length--) {
         var key = props[length];
-        if (!(key in object && baseIsEqual(source[key], object[key], undefined, true))) {
+        if (!(key in object &&
+              baseIsEqual(source[key], object[key], undefined, UNORDERED_COMPARE_FLAG | PARTIAL_COMPARE_FLAG)
+            )) {
           return false;
         }
       }
@@ -1057,7 +1058,7 @@
       while (++index < length) {
         var source = sources[index];
         if (source) {
-          assigner(object, source, customizer);
+          assigner(object, source, index, customizer);
         }
       }
       return object;
@@ -1289,7 +1290,6 @@
    */
   function equalObjects(object, other, equalFunc, customizer, bitmask, stack) {
     var isPartial = bitmask & PARTIAL_COMPARE_FLAG,
-        isUnordered = bitmask & UNORDERED_COMPARE_FLAG,
         objProps = keys(object),
         objLength = objProps.length,
         othProps = keys(other),
@@ -1301,8 +1301,7 @@
     var index = objLength;
     while (index--) {
       var key = objProps[index];
-      if (!(isPartial ? key in other : hasOwnProperty.call(other, key)) ||
-          !(isUnordered || key == othProps[index])) {
+      if (!(isPartial ? key in other : hasOwnProperty.call(other, key))) {
         return false;
       }
     }
@@ -1362,9 +1361,11 @@
    */
   function indexKeys(object) {
     var length = object ? object.length : undefined;
-    return (isLength(length) && (isArray(object) || isString(object) || isArguments(object)))
-      ? baseTimes(length, String)
-      : null;
+    if (isLength(length) &&
+        (isArray(object) || isString(object) || isArguments(object))) {
+      return baseTimes(length, String);
+    }
+    return null;
   }
 
   /**
@@ -1447,8 +1448,11 @@
    * // => [1]
    */
   var concat = rest(function(array, values) {
+    if (!isArray(array)) {
+      array = array == null ? [] : [Object(array)];
+    }
     values = baseFlatten(values);
-    return arrayConcat(isArray(array) ? array : [Object(array)], values);
+    return arrayConcat(array, values);
   });
 
   /**
@@ -1512,8 +1516,7 @@
    * Gets the index at which the first occurrence of `value` is found in `array`
    * using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
    * for equality comparisons. If `fromIndex` is negative, it's used as the offset
-   * from the end of `array`. If `array` is sorted providing `true` for `fromIndex`
-   * performs a faster binary search.
+   * from the end of `array`.
    *
    * @static
    * @memberOf _
@@ -1527,7 +1530,7 @@
    * _.indexOf([1, 2, 1, 2], 2);
    * // => 1
    *
-   * // using `fromIndex`
+   * // Search from the `fromIndex`.
    * _.indexOf([1, 2, 1, 2], 2, 2);
    * // => 3
    */
@@ -1584,6 +1587,8 @@
    */
   function slice(array, start, end) {
     var length = array ? array.length : 0;
+    start = start == null ? 0 : +start;
+    end = end === undefined ? length : +end;
     return length ? baseSlice(array, start, end) : [];
   }
 
@@ -1623,10 +1628,9 @@
   }
 
   /**
-   * This method invokes `interceptor` and returns `value`. The interceptor is
-   * invoked with one argument; (value). The purpose of this method is to "tap into"
-   * a method chain in order to perform operations on intermediate results within
-   * the chain.
+   * This method invokes `interceptor` and returns `value`. The interceptor
+   * is invoked with one argument; (value). The purpose of this method is to
+   * "tap into" a method chain in order to modify intermediate results.
    *
    * @static
    * @memberOf _
@@ -1638,6 +1642,7 @@
    *
    * _([1, 2, 3])
    *  .tap(function(array) {
+   *    // Mutate input array.
    *    array.pop();
    *  })
    *  .reverse()
@@ -1651,6 +1656,8 @@
 
   /**
    * This method is like `_.tap` except that it returns the result of `interceptor`.
+   * The purpose of this method is to "pass thru" values replacing intermediate
+   * results in a method chain.
    *
    * @static
    * @memberOf _
@@ -1687,11 +1694,11 @@
    *   { 'user': 'fred',   'age': 40 }
    * ];
    *
-   * // without explicit chaining
+   * // A sequence without explicit chaining.
    * _(users).head();
    * // => { 'user': 'barney', 'age': 36 }
    *
-   * // with explicit chaining
+   * // A sequence with explicit chaining.
    * _(users)
    *   .chain()
    *   .head()
@@ -1708,7 +1715,7 @@
    *
    * @name value
    * @memberOf _
-   * @alias run, toJSON, valueOf
+   * @alias toJSON, valueOf
    * @category Seq
    * @returns {*} Returns the resolved unwrapped value.
    * @example
@@ -1744,15 +1751,15 @@
    *   { 'user': 'fred',   'active': false }
    * ];
    *
-   * // using the `_.matches` iteratee shorthand
+   * // The `_.matches` iteratee shorthand.
    * _.every(users, { 'user': 'barney', 'active': false });
    * // => false
    *
-   * // using the `_.matchesProperty` iteratee shorthand
+   * // The `_.matchesProperty` iteratee shorthand.
    * _.every(users, ['active', false]);
    * // => true
    *
-   * // using the `_.property` iteratee shorthand
+   * // The `_.property` iteratee shorthand.
    * _.every(users, 'active');
    * // => false
    */
@@ -1782,15 +1789,15 @@
    * _.filter(users, function(o) { return !o.active; });
    * // => objects for ['fred']
    *
-   * // using the `_.matches` iteratee shorthand
+   * // The `_.matches` iteratee shorthand.
    * _.filter(users, { 'age': 36, 'active': true });
    * // => objects for ['barney']
    *
-   * // using the `_.matchesProperty` iteratee shorthand
+   * // The `_.matchesProperty` iteratee shorthand.
    * _.filter(users, ['active', false]);
    * // => objects for ['fred']
    *
-   * // using the `_.property` iteratee shorthand
+   * // The `_.property` iteratee shorthand.
    * _.filter(users, 'active');
    * // => objects for ['barney']
    */
@@ -1820,15 +1827,15 @@
    * _.find(users, function(o) { return o.age < 40; });
    * // => object for 'barney'
    *
-   * // using the `_.matches` iteratee shorthand
+   * // The `_.matches` iteratee shorthand.
    * _.find(users, { 'age': 1, 'active': true });
    * // => object for 'pebbles'
    *
-   * // using the `_.matchesProperty` iteratee shorthand
+   * // The `_.matchesProperty` iteratee shorthand.
    * _.find(users, ['active', false]);
    * // => object for 'fred'
    *
-   * // using the `_.property` iteratee shorthand
+   * // The `_.property` iteratee shorthand.
    * _.find(users, 'active');
    * // => object for 'barney'
    */
@@ -1869,36 +1876,6 @@
   }
 
   /**
-   * Invokes the method at `path` of each element in `collection`, returning
-   * an array of the results of each invoked method. Any additional arguments
-   * are provided to each invoked method. If `methodName` is a function it's
-   * invoked for, and `this` bound to, each element in `collection`.
-   *
-   * @static
-   * @memberOf _
-   * @category Collection
-   * @param {Array|Object} collection The collection to iterate over.
-   * @param {Array|Function|string} path The path of the method to invoke or
-   *  the function invoked per iteration.
-   * @param {...*} [args] The arguments to invoke each method with.
-   * @returns {Array} Returns the array of results.
-   * @example
-   *
-   * _.invokeMap([[5, 1, 7], [3, 2, 1]], 'sort');
-   * // => [[1, 5, 7], [1, 2, 3]]
-   *
-   * _.invokeMap([123, 456], String.prototype.split, '');
-   * // => [['1', '2', '3'], ['4', '5', '6']]
-   */
-  var invokeMap = rest(function(collection, path, args) {
-    var isFunc = typeof path == 'function';
-    return baseMap(collection, function(value) {
-      var func = isFunc ? path : value[path];
-      return func == null ? func : func.apply(value, args);
-    });
-  });
-
-  /**
    * Creates an array of values by running each element in `collection` through
    * `iteratee`. The iteratee is invoked with three arguments:
    * (value, index|key, collection).
@@ -1924,18 +1901,18 @@
    *   return n * n;
    * }
    *
-   * _.map([1, 2], square);
-   * // => [3, 6]
+   * _.map([4, 8], square);
+   * // => [16, 64]
    *
-   * _.map({ 'a': 1, 'b': 2 }, square);
-   * // => [3, 6] (iteration order is not guaranteed)
+   * _.map({ 'a': 4, 'b': 8 }, square);
+   * // => [16, 64] (iteration order is not guaranteed)
    *
    * var users = [
    *   { 'user': 'barney' },
    *   { 'user': 'fred' }
    * ];
    *
-   * // using the `_.property` iteratee shorthand
+   * // The `_.property` iteratee shorthand.
    * _.map(users, 'user');
    * // => ['barney', 'fred']
    */
@@ -1947,7 +1924,7 @@
    * Reduces `collection` to a value which is the accumulated result of running
    * each element in `collection` through `iteratee`, where each successive
    * invocation is supplied the return value of the previous. If `accumulator`
-   * is not provided the first element of `collection` is used as the initial
+   * is not given the first element of `collection` is used as the initial
    * value. The iteratee is invoked with four arguments:
    * (accumulator, value, index|key, collection).
    *
@@ -1969,7 +1946,7 @@
    *
    * _.reduce([1, 2], function(sum, n) {
    *   return sum + n;
-   * });
+   * }, 0);
    * // => 3
    *
    * _.reduce({ 'a': 1, 'b': 2, 'c': 1 }, function(result, value, key) {
@@ -2032,15 +2009,15 @@
    *   { 'user': 'fred',   'active': false }
    * ];
    *
-   * // using the `_.matches` iteratee shorthand
+   * // The `_.matches` iteratee shorthand.
    * _.some(users, { 'user': 'barney', 'active': false });
    * // => false
    *
-   * // using the `_.matchesProperty` iteratee shorthand
+   * // The `_.matchesProperty` iteratee shorthand.
    * _.some(users, ['active', false]);
    * // => true
    *
-   * // using the `_.property` iteratee shorthand
+   * // The `_.property` iteratee shorthand.
    * _.some(users, 'active');
    * // => true
    */
@@ -2092,26 +2069,6 @@
       return compareAscending(object.criteria, other.criteria) || (object.index - other.index);
     }), baseProperty('value'));
   }
-
-  /*------------------------------------------------------------------------*/
-
-  /**
-   * Gets the timestamp of the number of milliseconds that have elapsed since
-   * the Unix epoch (1 January 1970 00:00:00 UTC).
-   *
-   * @static
-   * @memberOf _
-   * @type Function
-   * @category Date
-   * @returns {number} Returns the timestamp.
-   * @example
-   *
-   * _.defer(function(stamp) {
-   *   console.log(_.now() - stamp);
-   * }, _.now());
-   * // => logs the number of milliseconds it took for the deferred function to be invoked
-   */
-  var now = Date.now;
 
   /*------------------------------------------------------------------------*/
 
@@ -2178,7 +2135,7 @@
    * bound('!');
    * // => 'hi fred!'
    *
-   * // using placeholders
+   * // Bound with placeholders.
    * var bound = _.bind(greet, object, _, '!');
    * bound('hi');
    * // => 'hi fred!'
@@ -2202,7 +2159,7 @@
    * _.defer(function(text) {
    *   console.log(text);
    * }, 'deferred');
-   * // logs 'deferred' after one or more milliseconds
+   * // => logs 'deferred' after one or more milliseconds
    */
   var defer = rest(function(func, args) {
     return baseDelay(func, 1, args);
@@ -2590,9 +2547,16 @@
    * // => false
    */
   function isEmpty(value) {
-    return (!isObjectLike(value) || isFunction(value.splice))
-      ? !size(value)
-      : !keys(value).length;
+    if (isArrayLike(value) &&
+        (isArray(value) || isString(value) || isFunction(value.splice) || isArguments(value))) {
+      return !value.length;
+    }
+    for (var key in value) {
+      if (hasOwnProperty.call(value, key)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -2730,8 +2694,6 @@
    * // => false
    */
   function isObject(value) {
-    // Avoid a V8 JIT bug in Chrome 19-20.
-    // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
     var type = typeof value;
     return !!value && (type == 'object' || type == 'function');
   }
@@ -3131,13 +3093,13 @@
    * defaults({ 'a': 1 }, { 'b': 2 }, { 'a': 3 });
    * // => { 'a': 1, 'b': 2 }
    */
-  var assignInWith = createAssigner(function(object, source, customizer) {
+  var assignInWith = createAssigner(function(object, source, srcIndex, customizer) {
     copyObjectWith(source, keysIn(source), object, customizer);
   });
 
   /**
    * Creates an object that inherits from the `prototype` object. If a `properties`
-   * object is provided its own enumerable properties are assigned to the created object.
+   * object is given its own enumerable properties are assigned to the created object.
    *
    * @static
    * @memberOf _
@@ -3445,7 +3407,7 @@
   /*------------------------------------------------------------------------*/
 
   /**
-   * This method returns the first argument provided to it.
+   * This method returns the first argument given to it.
    *
    * @static
    * @memberOf _
@@ -3481,7 +3443,7 @@
    *   { 'user': 'fred',   'age': 40 }
    * ];
    *
-   * // create custom iteratee shorthands
+   * // Create custom iteratee shorthands.
    * _.iteratee = _.wrap(_.iteratee, function(callback, func) {
    *   var p = /^(\S+)\s*([<>])\s*(\S+)$/.exec(func);
    *   return !p ? callback(func) : function(object) {
@@ -3493,6 +3455,32 @@
    * // => [{ 'user': 'fred', 'age': 40 }]
    */
   var iteratee = baseIteratee;
+
+  /**
+   * Creates a function that performs a deep partial comparison between a given
+   * object and `source`, returning `true` if the given object has equivalent
+   * property values, else `false`.
+   *
+   * **Note:** This method supports comparing the same values as `_.isEqual`.
+   *
+   * @static
+   * @memberOf _
+   * @category Util
+   * @param {Object} source The object of property values to match.
+   * @returns {Function} Returns the new function.
+   * @example
+   *
+   * var users = [
+   *   { 'user': 'barney', 'age': 36, 'active': true },
+   *   { 'user': 'fred',   'age': 40, 'active': false }
+   * ];
+   *
+   * _.filter(users, _.matches({ 'age': 40, 'active': false }));
+   * // => [{ 'user': 'fred', 'age': 40, 'active': false }]
+   */
+  function matches(source) {
+    return baseMatches(assign({}, source));
+  }
 
   /**
    * Adds all own enumerable function properties of a source object to the
@@ -3579,7 +3567,9 @@
    * var lodash = _.noConflict();
    */
   function noConflict() {
-    root._ = oldDash;
+    if (root._ === this) {
+      root._ = oldDash;
+    }
     return this;
   }
 
@@ -3602,7 +3592,7 @@
   }
 
   /**
-   * Generates a unique ID. If `prefix` is provided the ID is appended to it.
+   * Generates a unique ID. If `prefix` is given the ID is appended to it.
    *
    * @static
    * @memberOf _
@@ -3689,10 +3679,10 @@
   lodash.filter = filter;
   lodash.flatten = flatten;
   lodash.flattenDeep = flattenDeep;
-  lodash.invokeMap = invokeMap;
   lodash.iteratee = iteratee;
   lodash.keys = keys;
   lodash.map = map;
+  lodash.matches = matches;
   lodash.mixin = mixin;
   lodash.negate = negate;
   lodash.once = once;
@@ -3705,7 +3695,6 @@
   lodash.values = values;
 
   // Add aliases.
-  lodash.each = forEach;
   lodash.extend = assignIn;
 
   // Add functions to `lodash.prototype`.
@@ -3743,7 +3732,6 @@
   lodash.min = min;
   lodash.noConflict = noConflict;
   lodash.noop = noop;
-  lodash.now = now;
   lodash.reduce = reduce;
   lodash.result = result;
   lodash.size = size;
@@ -3751,6 +3739,7 @@
   lodash.uniqueId = uniqueId;
 
   // Add aliases.
+  lodash.each = forEach;
   lodash.first = head;
 
   mixin(lodash, (function() {
